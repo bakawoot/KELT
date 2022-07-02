@@ -75,4 +75,4 @@ for i in range(len(categories)):
         if website.find(class_ = 'product_list2 table-responsive') != None:
             items_list = website.find(class_ = 'product_list2 table-responsive')
             for item in items_list.find_all(class_ = 'cpcol_1'):
-                print(item.a.attrs)
+                print(item.a)
