@@ -20,7 +20,7 @@ for link in side_panel.find_all('a'):
     family_links.append(link.get('href'))
 
 categories = []
-items =[]
+item_links =[]
 #fetch website & get categories element
 for i in range(len(family_links)):
     #get website
@@ -41,9 +41,9 @@ for i in range(len(family_links)):
             items_list = website.find(class_ = 'product_list')
             for item in items_list.find_all(class_ = 'col-sm-9 col-xs-8 pb2_right'):
                 if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    items.append(item.a.get('href'))
+                    item_links.append(item.a.get('href'))
                 else:
-                    items.append(website_link + item.a.get('href'))
+                    item_links.append(website_link + item.a.get('href'))
 
 for i in range(len(categories)):
     html_text = requests.get(website_link + categories[i]).text
@@ -67,17 +67,46 @@ for i in range(len(categories)):
             items_list = website.find(class_ = 'product_list2 table-responsive')
             for item in items_list.find_all(class_ = 'odd'):
                 if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    items.append(item.a.get('href'))
+                    item_links.append(item.a.get('href'))
                 else:
-                    items.append(website_link + item.a.get('href'))
+                    item_links.append(website_link + item.a.get('href'))
                     
             for item in items_list.find_all(class_ = 'even'):
                 if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    items.append(item.a.get('href'))
+                    item_links.append(item.a.get('href'))
                 else:
-                    items.append(website_link + item.a.get('href'))
+                    item_links.append(website_link + item.a.get('href'))
+
+print(item_links)
+
+items = []
+rows = []
+for i in range(len(item_links)):
+    print(item_links[i])
+    html_text = requests.get(item_links[i]).text
+    website = BeautifulSoup(html_text, 'lxml')
+    if 'https://www.timarvasker.hu/' in item_links[i]:
+        print('jó oldalt vizsgálunk')
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
+        #rows.append(website.find(class_ = 'count2'))
+        if website.find(class_ = 'product_tab act') != None:
+            rows.append(website.find(class_ = 'product_tab act').text.replace('\n' , '').replace('\xf5', 'ő'))
+            
+        items.append(rows)
+        rows = []
+
+        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ''))
+        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , ''))
+        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ''))
+        #print(website.find(class_ = 'count2'))
+        if website.find(class_ = 'product_tab act') != None:
+            print(website.find(class_ = 'product_tab act').text.replace('\n' , ''))
+
+print(items)
 
 with open('timarvasker.csv', 'w', newline = '') as csv_file:
-     write = csv.writer(csv_file)
-     for item in items:
-         csv_file.write("%s\n" % item)
+    write = csv.writer(csv_file)
+    for i in range(len(items)):
+        write.writerow(items[i])
