@@ -1,9 +1,6 @@
 #megvannak azok a termékek linkjei, amelyek nincsenek kategóriába sorolva, csak családba!
 #megvannak azon kategóriák linkjei, amelyek közvetlenül családhoz vannak sorolva
 
-#todo: kategória kezelés
-
-
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -21,7 +18,6 @@ side_panel = website.find(id = 'left_menu_collapse')
 family_links = []
 for link in side_panel.find_all('a'):
     family_links.append(link.get('href'))
-    #print(link.get('href'))
 
 categories = []
 items =[]
@@ -37,20 +33,17 @@ for i in range(len(family_links)):
         #if category element exists
         category_element = website.find(class_ = 'category_categories')
         for category in category_element.find_all(class_ = 'pic'):
-            #print(category.a.get('href'))
-            categories.append(category.a.get('href'))
-            
-        #for category in website.find_all(class_ = 'category_box_in'):
-        #    categories.append(category.a.get('href'))
-        
+            categories.append(category.a.get('href'))       
     else:
         
         #if category element doesn't exist:
         if website.find(class_ = 'product_list') != None:
             items_list = website.find(class_ = 'product_list')
             for item in items_list.find_all(class_ = 'col-sm-9 col-xs-8 pb2_right'):
-                items.append(item.a.get('href'))
-    #print(items)
+                if 'http://timarszerszam.hu/' in item.a.get('href'):
+                    items.append(item.a.get('href'))
+                else:
+                    items.append(website_link + item.a.get('href'))
 
 for i in range(len(categories)):
     html_text = requests.get(website_link + categories[i]).text
@@ -62,7 +55,6 @@ for i in range(len(categories)):
         #if category element exists
         category_element = website.find(class_ = 'category_categories')
         for category in category_element.find_all(class_ = 'pic'):
-            #print(category.a.get('href'))
             categories.append(category.a.get('href'))
 
 for i in range(len(categories)):
@@ -71,8 +63,21 @@ for i in range(len(categories)):
 
     #check if we have more categories or not
     if website.find(class_ = 'category_categories') == None:
-        print('újabb kategória')
         if website.find(class_ = 'product_list2 table-responsive') != None:
             items_list = website.find(class_ = 'product_list2 table-responsive')
-            for item in items_list.find_all(class_ = 'cpcol_1'):
-                print(item.a)
+            for item in items_list.find_all(class_ = 'odd'):
+                if 'http://timarszerszam.hu/' in item.a.get('href'):
+                    items.append(item.a.get('href'))
+                else:
+                    items.append(website_link + item.a.get('href'))
+                    
+            for item in items_list.find_all(class_ = 'even'):
+                if 'http://timarszerszam.hu/' in item.a.get('href'):
+                    items.append(item.a.get('href'))
+                else:
+                    items.append(website_link + item.a.get('href'))
+
+with open('timarvasker.csv', 'w', newline = '') as csv_file:
+     write = csv.writer(csv_file)
+     for item in items:
+         csv_file.write("%s\n" % item)
