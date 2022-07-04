@@ -82,29 +82,21 @@ print(item_links)
 items = []
 rows = []
 for i in range(len(item_links)):
-    print(item_links[i])
     html_text = requests.get(item_links[i]).text
     website = BeautifulSoup(html_text, 'lxml')
-    if 'https://www.timarvasker.hu/' in item_links[i]:
-        print('jó oldalt vizsgálunk')
-        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
-        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
-        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , '').replace('\xf5', 'HIBÁSKARAKTER'))
-        #rows.append(website.find(class_ = 'count2'))
+    if 'http://www.timarvasker.hu/' in item_links[i] or 'https://www.timarvasker.hu/' in item_links[i]:
+        #cikkszám
+        #rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ''))
+        #megnevezés
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , '').replace('\xf5', 'ő'))
+        #ár
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ''))
+        #Termékleírás
         if website.find(class_ = 'product_tab act') != None:
             rows.append(website.find(class_ = 'product_tab act').text.replace('\n' , '').replace('\xf5', 'ő'))
             
         items.append(rows)
         rows = []
-
-        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ''))
-        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , ''))
-        print(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ''))
-        #print(website.find(class_ = 'count2'))
-        if website.find(class_ = 'product_tab act') != None:
-            print(website.find(class_ = 'product_tab act').text.replace('\n' , ''))
-
-print(items)
 
 with open('timarvasker.csv', 'w', newline = '') as csv_file:
     write = csv.writer(csv_file)
