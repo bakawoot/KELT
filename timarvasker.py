@@ -1,6 +1,3 @@
-#megvannak azok a termékek linkjei, amelyek nincsenek kategóriába sorolva, csak családba!
-#megvannak azon kategóriák linkjei, amelyek közvetlenül családhoz vannak sorolva
-
 from bs4 import BeautifulSoup
 import requests
 import re
@@ -77,8 +74,6 @@ for i in range(len(categories)):
                 else:
                     item_links.append(website_link + item.a.get('href'))
 
-print(item_links)
-
 items = []
 rows = []
 for i in range(len(item_links)):
@@ -86,14 +81,24 @@ for i in range(len(item_links)):
     website = BeautifulSoup(html_text, 'lxml')
     if 'http://www.timarvasker.hu/' in item_links[i] or 'https://www.timarvasker.hu/' in item_links[i]:
         #cikkszám
-        #rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ''))
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ' '))
         #megnevezés
-        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , '').replace('\xf5', 'ő'))
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right print_hide').text.replace('\n' , ' ').replace('\xf5', 'ő'))
         #ár
-        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ''))
+        rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ' '))
         #Termékleírás
         if website.find(class_ = 'product_tab act') != None:
-            rows.append(website.find(class_ = 'product_tab act').text.replace('\n' , '').replace('\xf5', 'ő'))
+            rows.append(website.find(class_ = 'product_tab act').text.replace('\n' , ' ').replace('\xf5', 'ő'))
+        else:
+            rows.append('')
+        #hivatkozás
+        rows.append(item_links[i])
+
+        for stock in website.find_all(class_ = 'product_stock_span'):
+            if stock.find(class_ = "glyphicon glyphicon-ok"):
+                rows.append(stock.text + "OK")
+            else:
+                rows.append(stock.text + "NEM OK")
             
         items.append(rows)
         rows = []
