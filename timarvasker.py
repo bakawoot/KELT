@@ -3,10 +3,14 @@ import requests
 import re
 import csv
 
+def fetch_website(_weblink):
+    _html_text = requests.get(_weblink).text
+    _website = BeautifulSoup(_html_text, 'lxml')
+    return _website
+
 #fetch website
 website_link = 'https://www.timarvasker.hu/'
-html_text = requests.get(website_link).text
-website = BeautifulSoup(html_text, 'lxml')
+website = fetch_website(website_link)
 
 #declare element for the family list
 side_panel = website.find(id = 'left_menu_collapse')
@@ -21,8 +25,7 @@ item_links =[]
 #fetch website & get categories element
 for i in range(len(family_links)):
     #get website
-    html_text = requests.get(family_links[i]).text
-    website = BeautifulSoup(html_text, 'lxml')
+    website = fetch_website(family_links[i])
 
     #check if we have categories or not
     if website.find(class_ = 'category_categories') != None:
@@ -43,8 +46,7 @@ for i in range(len(family_links)):
                     item_links.append(website_link + item.a.get('href'))
 
 for i in range(len(categories)):
-    html_text = requests.get(website_link + categories[i]).text
-    website = BeautifulSoup(html_text, 'lxml')
+    website = fetch_website(website_link + categories[i])
 
     #check if we have more categories or not
     if website.find(class_ = 'category_categories') != None:
@@ -55,8 +57,7 @@ for i in range(len(categories)):
             categories.append(category.a.get('href'))
 
 for i in range(len(categories)):
-    html_text = requests.get(website_link + categories[i]).text
-    website = BeautifulSoup(html_text, 'lxml')
+    website = fetch_website(website_link + categories[i])
 
     #check if we have more categories or not
     if website.find(class_ = 'category_categories') == None:
@@ -77,8 +78,7 @@ for i in range(len(categories)):
 items = []
 rows = []
 for i in range(len(item_links)):
-    html_text = requests.get(item_links[i]).text
-    website = BeautifulSoup(html_text, 'lxml')
+    website = fetch_website(item_links[i])
     if 'http://www.timarvasker.hu/' in item_links[i] or 'https://www.timarvasker.hu/' in item_links[i]:
         #cikkszám
         rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ' '))
