@@ -26,7 +26,6 @@ item_links =[]
 for i in range(len(family_links)):
     #get website
     website = fetch_website(family_links[i])
-
     #check if we have categories or not
     if website.find(class_ = 'category_categories') != None:
 
@@ -40,41 +39,31 @@ for i in range(len(family_links)):
         if website.find(class_ = 'product_list') != None:
             items_list = website.find(class_ = 'product_list')
             for item in items_list.find_all(class_ = 'col-sm-9 col-xs-8 pb2_right'):
-                if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    item_links.append(item.a.get('href'))
-                else:
+                if 'http://timarszerszam.hu/' not in item.a.get('href'):
                     item_links.append(website_link + item.a.get('href'))
 
 for i in range(len(categories)):
     website = fetch_website(website_link + categories[i])
-
     #check if we have more categories or not
     if website.find(class_ = 'category_categories') != None:
-
         #if category element exists
         category_element = website.find(class_ = 'category_categories')
         for category in category_element.find_all(class_ = 'pic'):
             categories.append(category.a.get('href'))
-
+            
 for i in range(len(categories)):
     website = fetch_website(website_link + categories[i])
-
     #check if we have more categories or not
     if website.find(class_ = 'category_categories') == None:
         if website.find(class_ = 'product_list2 table-responsive') != None:
             items_list = website.find(class_ = 'product_list2 table-responsive')
             for item in items_list.find_all(class_ = 'odd'):
-                if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    item_links.append(item.a.get('href'))
-                else:
+                if 'http://timarszerszam.hu/' not in item.a.get('href'):
+                    item_links.append(website_link + item.a.get('href'))
+            for item in items_list.find_all(class_ = 'even'):
+                if 'http://timarszerszam.hu/' not in item.a.get('href'):
                     item_links.append(website_link + item.a.get('href'))
                     
-            for item in items_list.find_all(class_ = 'even'):
-                if 'http://timarszerszam.hu/' in item.a.get('href'):
-                    item_links.append(item.a.get('href'))
-                else:
-                    item_links.append(website_link + item.a.get('href'))
-
 items = []
 rows = []
 for i in range(len(item_links)):
