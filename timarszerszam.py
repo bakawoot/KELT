@@ -42,26 +42,22 @@ for i in range(len(categories)):
             items_list = website.find(class_ = 'product_list2')
             for item in items_list.find_all(class_ = 'row product_box2'):
                 item_links.append(website_link + item.a.get('href'))
-
-print(item_links)
-
-
+                
 items = []
 rows = []
 for i in range(len(item_links)):
     website = fetch_website(item_links[i])
     #gyártói cikkszám
-    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text.replace('\n' , ' '))
+    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right product_no').text)
     #megnevezés
-    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right').text.replace('\n' , ' ').replace('\xfb', 'ő').replace('\xfb', 'HIBASKARAKTER'))
+    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right').text)
     #ár
-    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text.replace('\n' , ' '))
+    rows.append(website.find(class_ = 'col-sm-9 col-xs-8 pb2_right price').text)
+    #készletinfó
     if website.find(class_ = "stock outstock"):
         rows.append(website.find(class_ = "stock outstock").text)
     if website.find(class_ = "stock instock"):
         rows.append(website.find(class_ = "stock instock").text)
-    #készletinfó
-    rows.append(website.find(class_ = 'product_order_row').text.replace('\n' , ' '))
     #hivatkozás
     rows.append(item_links[i].replace('\n' , ' '))
     
