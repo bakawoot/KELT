@@ -33,21 +33,19 @@ def get_every_category_link(_family_link, _WEBSITE_LINK):
     _categories = []
     _categories.append(_family_link)
     _website = get_website(_categories[0])
+    _last_categories = []
+    
     while _categories:
+        #print(_categories)
         if _website.find(class_ = 'category_categories') is not None:
             _website = get_website(_categories[0])
             for _category_box_in in _website.find_all(class_ = 'category_box_in'):
-                if _website.find(class_ = 'category_categories') is not None:
-                    _categories.append(WEBSITE_LINK + _category_box_in.a.get('href'))
-                else:
-                    print(_categories[0])
-                    return _categories[0]
+                _categories.append(WEBSITE_LINK + _category_box_in.a.get('href'))
         else:
-            print(_categories[0])
-            return _categories[0]
+            _last_categories.append(_categories[0])
         if _categories:
             del _categories[0]
-
+    return _last_categories
         
 def find_last_category_depth(_category_links):
     print(_category_links)
@@ -164,10 +162,10 @@ family_links = get_every_family_link(side_panel)
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = executor.map(get_every_category_link, family_links, WEBSITE_LINK)
 
-    #for result in results:
-        #print(result)
+    for result in results:
+        print(result)
         
-#print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every category.')
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every category.')
 
 
 
