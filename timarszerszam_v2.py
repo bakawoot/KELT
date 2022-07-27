@@ -29,14 +29,12 @@ def get_every_family_link(_side_panel):
     return _family_links
 
 
-def get_every_category_link(_family_link, _WEBSITE_LINK):
+def get_last_category_depth(_family_link, _WEBSITE_LINK):
+    _last_categories = []
     _categories = []
     _categories.append(_family_link)
-    _website = get_website(_categories[0])
-    _last_categories = []
-    
+    _website = get_website(_categories[0])    
     while _categories:
-        #print(_categories)
         if _website.find(class_ = 'category_categories') is not None:
             _website = get_website(_categories[0])
             for _category_box_in in _website.find_all(class_ = 'category_box_in'):
@@ -47,14 +45,6 @@ def get_every_category_link(_family_link, _WEBSITE_LINK):
             del _categories[0]
     return _last_categories
         
-def find_last_category_depth(_category_links):
-    print(_category_links)
-    _last_category = []
-    for _category in _category_links:
-        _website = get_website(_category)
-        if _website.find(class_ = 'category_categories') is None:
-            return _category
-
 
 def get_item_links(_category_link, _WEBSITE_LINK):
     print(_category_link)
@@ -160,7 +150,7 @@ side_panel = website.find(id = SIDE_MENU_ID)
 family_links = get_every_family_link(side_panel)
 
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = executor.map(get_every_category_link, family_links, WEBSITE_LINK)
+    results = executor.map(get_last_category_depth, family_links, WEBSITE_LINK)
 
     for result in results:
         print(result)
