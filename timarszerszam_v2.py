@@ -6,6 +6,7 @@ import requests
 import re
 import csv
 
+
 WEBSITE_LINK = 'https://timarszerszam.hu'
 ITEM_NAME_CLASS = 'maintitle'
 ITEM_PRODUCT_NUMBER = 'col-sm-9 col-xs-8 pb2_right product_no'
@@ -14,10 +15,10 @@ ITEM_DESCRIPTION = 'col-sm-9 col-xs-8 pb2_right lead'
 ITEM_LONG_DESCRIPTION = 'product_tab act'
 SIDE_MENU_ID = 'left_menu_collapse'
 
+
 def get_website(_weblink):
     _html_text = requests.get(_weblink).text
     _website = BeautifulSoup(_html_text, 'lxml')
-    
     return _website
 
 
@@ -29,7 +30,7 @@ def get_every_family_link(_side_panel):
     return _family_links
 
 
-def get_last_category_depth(_family_link, _WEBSITE_LINK):
+def get_last_category_depth(_family_link):
     _last_categories = []
     _categories = []
     _categories.append(_family_link)
@@ -46,21 +47,18 @@ def get_last_category_depth(_family_link, _WEBSITE_LINK):
     return _last_categories
         
 
-def get_item_links(_category_link, _WEBSITE_LINK):
-    print(_category_link)
+def get_item_links(_category_link):
     _item_links = []
-    _no_item_link_category = []
     _website = get_website(_category_link)
     if _website.find(class_ = 'product_list2') is not None:
         _items = _website.find(class_ = 'product_list2')
         for _item in _items.find_all(class_ = 'row product_box2'):
             _a_tag = _item.find(class_ = 'col-sm-9 col-xs-8 pb2_right').a
             if hasattr(_a_tag, 'href'):
-                _item_link = _WEBSITE_LINK + _item.find(class_ = 'col-sm-9 col-xs-8 pb2_right').a.get('href')
+                _item_link = WEBSITE_LINK + _item.find(class_ = 'col-sm-9 col-xs-8 pb2_right').a.get('href')
                 _item_links.append(_item_link)
-    else:
-        _item_links.append(_category)
-    
+    # else:
+        # le kell kezelni
     return _item_links
 
 
@@ -76,36 +74,36 @@ def replace_character(_string):
     _string = _string.replace('\n', '').replace('\u2033', 'SPECIALIS_KARAKTER23').replace('\u2103', 'SPECIALIS_KARAKTER24')
     _string = _string.replace('\u03b1', 'SPECIALIS_KARAKTER25').replace('\u240d','SPECIALIS_KARAKTER26').replace('\u03bc','SPECIALIS_KARAKTER27')
     _string = _string.replace('\u0301','SPECIALIS_KARAKTER28').replace('\u0308','SPECIALIS_KARAKTER29').replace(';',',')
-    
     _string = _string.replace('\u030b','SPECIALIS_KARAKTER30')
     return _string
 
 
-def get_item_data (_item_link, _website, _item_name_class, _item_product_number, _item_price, _item_description, _item_long_description):
+def get_item_data(_item_link):
     _row = []
+    _website = get_website(_item_link)
     if _item_link.endswith('/t'):
-        if _website.find(class_ = _item_name_class):
-            _row.append(replace_character(_website.find(class_ = _item_name_class).text))
+        if _website.find(class_ = ITEM_NAME_CLASS):
+            _row.append(replace_character(_website.find(class_ = ITEM_NAME_CLASS).text))
         else:
             _row.append('NINCS_NEV')
 
-        if _website.find(class_ = _item_product_number):
-            _row.append(replace_character(_website.find(class_ = _item_product_number).text))
+        if _website.find(class_ = ITEM_PRODUCT_NUMBER):
+            _row.append(replace_character(_website.find(class_ = ITEM_PRODUCT_NUMBER).text))
         else:
             _row.append('NINCS_SOROZATSZAM')
                 
-        if _website.find(class_ = _item_description):   
-            _row.append(replace_character(_website.find(class_ =  _item_description).text))
+        if _website.find(class_ = ITEM_DESCRIPTION):   
+            _row.append(replace_character(_website.find(class_ =  ITEM_DESCRIPTION).text))
         else:
             _row.append('NINCS_LEIRAS')
 
-        if _website.find(class_ = _item_price):
-            _row.append(replace_character(_website.find(class_ =  _item_price).text))
+        if _website.find(class_ = ITEM_PRICE):
+            _row.append(replace_character(_website.find(class_ =  ITEM_PRICE).text))
         else:
             _row.append('NINCS_AR')
             
-        if _website.find(class_ = _item_long_description):
-            _row.append(replace_character(_website.find(class_ = _item_long_description).text))
+        if _website.find(class_ = ITEM_LONG_DESCRIPTION):
+            _row.append(replace_character(_website.find(class_ = ITEM_LONG_DESCRIPTION).text))
         else:
             _row.append('')
 
@@ -149,43 +147,32 @@ side_panel = website.find(id = SIDE_MENU_ID)
 
 family_links = get_every_family_link(side_panel)
 
+last_category_depth_links = []
 with concurrent.futures.ThreadPoolExecutor() as executor:
-    results = executor.map(get_last_category_depth, family_links, WEBSITE_LINK)
-
+    results = executor.map(get_last_category_depth, family_links)
     for result in results:
-        print(result)
-        
-print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every category.')
+        last_category_depth_links.append(result)   
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every last category depth.')
 
+item_links = []
+for row in last_category_depth_links:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = executor.map(get_item_links, row)
+        for result in results:
+            item_links.append(result)
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every item link.')
 
+item_data = []
+for row in item_links:
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        results = executor.map(get_item_data, row)
+        for result in results:
+            item_data.append(result)
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Got every item data.')
 
-    
-#with concurrent.futures.ThreadPoolExecutor() as executor:
-#    results = executor.map(find_last_category_depth, categories)
-#print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every last category depth.')
-#last_categories = []
-#for result in results:
-#    last_categories.append(result)
-
-
-#with concurrent.futures.ThreadPoolExecutor() as executor:
-#    results = executor.map(get_item_links, last_categories, WEBSITE_LINK)
-#print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every item link.')
-#item_links = []
-#for result in results:
-#    item_links.append(result)
-
-#print(item_links)
-#item_links = get_item_links(last_categories, WEBSITE_LINK)
-
-#with open('timarszerszam.csv', 'w', newline = '') as csv_file:
-#    write = csv.writer(csv_file, delimiter=';')
-#    for item_link in item_links:
-#        website = get_website(item_link)
-#        write.writerow(get_item_data(item_link, website, ITEM_NAME_CLASS, ITEM_PRODUCT_NUMBER, ITEM_PRICE, ITEM_DESCRIPTION, ITEM_LONG_DESCRIPTION))
+with open('timarszerszam.csv', 'w', newline = '') as csv_file:
+    write = csv.writer(csv_file, delimiter=';')
+    for item in item_data:
+        write.writerow(item)
 
 print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Done.')
-
-#with open('timarszerszam.csv', 'w', newline = '') as csv_file:
-#        write = csv.writer(csv_file, delimiter=';')
-#        write.writerow(get_item(item_link, website, ITEM_NAME_CLASS, ITEM_PRODUCT_NUMBER, ITEM_PRICE, ITEM_DESCRIPTION, ITEM_LONG_DESCRIPTION))
