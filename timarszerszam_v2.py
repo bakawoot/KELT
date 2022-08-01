@@ -33,9 +33,9 @@ def get_every_family_link(_side_panel):
 def get_last_category_depth(_family_link):
     _last_categories = []
     _categories = []
-    _categories.append(_family_link)
-    _website = get_website(_categories[0])    
+    _categories.append(_family_link)    
     while _categories:
+        _website = get_website(_categories[0])
         if _website.find(class_ = 'category_categories') is not None:
             _website = get_website(_categories[0])
             for _category_box_in in _website.find_all(class_ = 'category_box_in'):
@@ -43,7 +43,7 @@ def get_last_category_depth(_family_link):
         else:
             _last_categories.append(_categories[0])
         if _categories:
-            del _categories[0]
+            _categories.pop(0)
     return _last_categories
         
 
@@ -151,8 +151,14 @@ last_category_depth_links = []
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = executor.map(get_last_category_depth, family_links)
     for result in results:
-        last_category_depth_links.append(result)   
-print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every last category depth.')
+        last_category_depth_links.append(result)
+        
+i = 0
+for row in last_category_depth_links:
+    for category in row:
+        i += 1
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every last category depth.', i)
+
 
 item_links = []
 for row in last_category_depth_links:
@@ -160,7 +166,13 @@ for row in last_category_depth_links:
         results = executor.map(get_item_links, row)
         for result in results:
             item_links.append(result)
-print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every item link.')
+
+i = 0
+for row in item_links:
+    for item in row:
+        i += 1
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every item link.', i)
+
 
 item_data = []
 for row in item_links:
@@ -168,7 +180,8 @@ for row in item_links:
         results = executor.map(get_item_data, row)
         for result in results:
             item_data.append(result)
-print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Got every item data.')
+
+print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Got every item data.', i)
 
 with open('timarszerszam.csv', 'w', newline = '') as csv_file:
     write = csv.writer(csv_file, delimiter=';')
