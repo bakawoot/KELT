@@ -6,7 +6,6 @@ import requests
 import re
 import csv
 
-
 WEBSITE_LINK = 'https://timarszerszam.hu'
 ITEM_NAME_CLASS = 'maintitle'
 ITEM_PRODUCT_NUMBER = 'col-sm-9 col-xs-8 pb2_right product_no'
@@ -173,13 +172,16 @@ for row in item_links:
         i += 1
 print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Found every item link.', i)
 
+item_links2 = []
+for row in item_links:
+    for item in row:
+        item_links2.append(item)
 
 item_data = []
-for row in item_links:
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        results = executor.map(get_item_data, row)
-        for result in results:
-            item_data.append(result)
+with concurrent.futures.ThreadPoolExecutor() as executor:
+    results = executor.map(get_item_data, item_links2)
+    for result in results:
+        item_data.append(result)
 
 print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Got every item data.', i)
 
