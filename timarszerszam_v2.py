@@ -1,9 +1,8 @@
 from bs4 import BeautifulSoup
 from datetime import datetime
+from urllib.request import urlopen
 
 import concurrent.futures
-import requests
-import re
 import csv
 
 WEBSITE_LINK = 'https://timarszerszam.hu'
@@ -16,9 +15,11 @@ SIDE_MENU_ID = 'left_menu_collapse'
 
 
 def get_website(_weblink):
-    _html_text = requests.get(_weblink).text
-    _website = BeautifulSoup(_html_text, 'lxml')
-    return _website
+    print(_weblink)
+    _response = urlopen(_weblink)
+    if _response.code == 200:  # 200: OK
+        _website_data = BeautifulSoup(_response.read().decode("UTF-8"), 'lxml')
+        return _website_data
 
 
 def get_every_family_link(_side_panel):
@@ -77,10 +78,22 @@ def replace_character(_string):
     return _string
 
 
+def get_category( _website):
+    _category = []
+    if(_website.find(class_ = 'breadcrumb')):
+        _category_element = _website.find(class_ = 'breadcrumb')
+        for _a in _category_element.find_all('a'):
+            _category.append(_a.text)
+    _category.pop(0)
+    return _category
+
+
+
 def get_item_data(_item_link):
     _row = []
     _website = get_website(_item_link)
     if _item_link.endswith('/t'):
+        get_category(_website)
         if _website.find(class_ = ITEM_NAME_CLASS):
             _row.append(replace_character(_website.find(class_ = ITEM_NAME_CLASS).text))
         else:
@@ -135,7 +148,7 @@ def get_item_data(_item_link):
                 _row.append('Nincs raktáron')
             _row.append('nem_volt_linkje')
             _row.append(_item_link)
-    
+    _row.append(get_category(_website))    
     return _row
 
 
@@ -146,11 +159,18 @@ side_panel = website.find(id = SIDE_MENU_ID)
 
 family_links = get_every_family_link(side_panel)
 
+family_links.pop()  # We don't care about the last family
+
 last_category_depth_links = []
 with concurrent.futures.ThreadPoolExecutor() as executor:
     results = executor.map(get_last_category_depth, family_links)
     for result in results:
         last_category_depth_links.append(result)
+
+#every_category = []
+#for last_category in last_category_depth_links:
+#    print(last_category)
+    #print(get_category(get_website(last_category)))
         
 i = 0
 for row in last_category_depth_links:
