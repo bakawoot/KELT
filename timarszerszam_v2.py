@@ -15,7 +15,6 @@ SIDE_MENU_ID = 'left_menu_collapse'
 
 
 def get_website(_weblink):
-    print(_weblink)
     _response = urlopen(_weblink)
     if _response.code == 200:  # 200: OK
         _website_data = BeautifulSoup(_response.read().decode("UTF-8"), 'lxml')
@@ -166,11 +165,6 @@ with concurrent.futures.ThreadPoolExecutor() as executor:
     results = executor.map(get_last_category_depth, family_links)
     for result in results:
         last_category_depth_links.append(result)
-
-#every_category = []
-#for last_category in last_category_depth_links:
-#    print(last_category)
-    #print(get_category(get_website(last_category)))
         
 i = 0
 for row in last_category_depth_links:
