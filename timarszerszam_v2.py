@@ -1,5 +1,3 @@
-from bs4 import BeautifulSoup  # Will remove this
-
 from urllib.request import urlopen
 from lxml import html
 
@@ -17,11 +15,9 @@ SIDE_MENU_ID = 'left_menu_collapse'
 
 
 def get_website(_weblink):
-    #print(_weblink)
     _response = urlopen(_weblink)
     if _response.code == 200:  # 200: OK
         _website = html.fromstring(html = _response.read().decode("UTF-8"))
-        #_website_data = BeautifulSoup(_response.read().decode("UTF-8"), 'lxml')
         return _website
 
 
@@ -87,16 +83,15 @@ def get_category( _website):
     return _category
 
 
-
 def get_item_data(_item_link):
     #print(_item_link)
     _row = []
     _website = get_website(_item_link)
         #get_category(_website)
-    _row.append(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right')]/h2/a/text()"))
-    _row.append(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right product_no')]/text()"))
-    _row.append(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right lead')]/text()"))
-    _row.append(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right price')]/text()"))
+    _row.extend(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right')]/h2/a/text()"))
+    _row.extend(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right product_no')]/text()"))
+    _row.extend(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right lead')]/text()"))
+    _row.extend(_website.xpath("//div[contains(@class,'col-sm-9 col-xs-8 pb2_right price')]/text()"))
             
         #if _website.find(class_ = ITEM_LONG_DESCRIPTION):
         #    _row.append(replace_character(_website.find(class_ = ITEM_LONG_DESCRIPTION).text))
@@ -132,7 +127,7 @@ def get_item_data(_item_link):
     #            _row.append('Nincs raktáron')
     #        _row.append('nem_volt_linkje')
     #        _row.append(_item_link)
-    #_row.append(get_category(_website))    
+    #_row.append(get_category(_website))
     return _row
 
 
@@ -184,6 +179,6 @@ print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Got every item data.', 
 with open('timarszerszam.csv', 'w', encoding='UTF-8', newline = '') as csv_file:
     write = csv.writer(csv_file, delimiter=';')
     for item in item_data:
-        write.writerow(item[0])
+        write.writerow(item)
 
 print('[' + datetime.now().strftime("%H:%M:%S") + ']' , 'Done.')
